@@ -125,4 +125,8 @@ class FlutterWindowManager {
       "flags": flags,
     });
   }
+
+  static Future<bool> isScreenRecording() async {
+    return await _channel.invokeMethod("isScreenRecording");
+  }
 }

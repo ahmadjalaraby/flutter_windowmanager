@@ -3,6 +3,8 @@ package io.adaptant.labs.flutter_windowmanager;
 import android.app.Activity;
 import android.os.Build;
 import android.view.WindowManager;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
 
 import androidx.annotation.NonNull;
 
@@ -16,15 +18,18 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
+
 /** FlutterWindowManagerPlugin */
 public class FlutterWindowManagerPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
   private Activity activity;
+  private MediaProjectionManager mediaProjectionManager;
 
   @SuppressWarnings("unused")
   public FlutterWindowManagerPlugin() { }
 
   private FlutterWindowManagerPlugin(Activity activity) {
     this.activity = activity;
+    mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
   }
 
   /** Plugin registration. */
@@ -47,6 +52,12 @@ public class FlutterWindowManagerPlugin implements MethodCallHandler, FlutterPlu
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
 
+  }
+
+  private boolean isScreenRecordingActive() {
+        // Check if there's an active media projection session.
+      MediaProjection mediaProjection = mediaProjectionManager.getActiveProjection();
+      return mediaProjection != null;
   }
 
   /**
@@ -142,6 +153,8 @@ public class FlutterWindowManagerPlugin implements MethodCallHandler, FlutterPlu
       case "getFlagEnabled":
         result.success((activity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_SECURE) != 0);
         break;
+      case "isScreenRecording":
+        result.success(isScreenRecordingActive());
       default:
         result.notImplemented();
     }
